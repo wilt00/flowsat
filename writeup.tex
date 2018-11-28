@@ -1,0 +1,39 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{relsize}
+\usepackage{amsmath}
+
+\title{491AIP - Free Flow}
+\author{Will Toher}
+\date{November 2018}
+
+\begin{document}
+
+\maketitle
+
+\section{CNF Formula}
+
+We define the problem in terms of edges. Each cell $(i,j)$ is bordered by 4 edges $ E_{ij} = \{ e_{ijN}, e_{ijS}, e_{ijE}, e_{ijW} \}$. $e_{ijS}$ is the same edge as $e_{(i+1)jN}$, but for ease of notation we may write it in either formulation. We add one variable to our formula per edge per color, e.g. $e_{ijDk}$ for direction $D$ and color $k$.
+
+Each pin cell $(i,j) \in P$ is the terminator of a path of that color, and each path cuts one or more edges. Exactly one of the edges of a pin cell is cut by a path of that pin's color. Therefore, we add to the overall CNF formula the negation of each incorrect colored edge, and another term where, for each correct colored edge, exactly one is true and the rest are false:
+$$ \forall (i,j) \in P, (\forall k != k_{ij}, \neg e_{ijDk}) \land (\forall k = k_{ij}, \mathlarger{\lor} (e_{ijDk} \land (E_{ij} - e_{ijDk}))) $$
+
+For each non-pin cell $(i,j) \notin P$, either exactly two of its edges are cut by the same color, or none of its edges are cut.
+We represent each non-pin cell in the CNF formula by a single clause.
+To this clause, we first add one term which is the negation of all of this cell's edges of all colors.
+Then, for each color, for each pair of edges, we add a term in which these edges are true and all others are false.
+
+\begin{align*}
+\forall (i,j) \in P, \mathlarger{\lor} \Big(&(\forall k != k_{ij}, \neg E_{ijk}) \lor \\
+&(\forall k \in K, \forall f,g \in D,   (e_{ijfk} \land e_{ijgk} \land (E_{ij} - e_{ijfk} - e_{ijgk}))\Big)
+\end{align*}
+
+This is sufficient to define the problem. For any non-pin cell, either it is not entered by any path, or it is entered and exited by a single path, in which case exactly two of its edges are cut by the same color.
+Note that this formulation excludes non-simple paths between pins, but it allows isolated, 'orphaned' loops elsewhere in the grid, not terminating at a pin; these loops have no bearing on the satisfiability of a given grid.
+
+\section{Runtime}
+This reduction is polynomial. Performing it requires looping over the size of the grid, $N^2$, and the list of edges, $4K$.
+
+\section{}
+
+\end{document}
